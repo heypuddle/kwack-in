@@ -2,122 +2,342 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🦆 kwack.in</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🦆 Flappy Duck</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #fef9c3 0%, #fef08a 50%, #fde047 100%); font-family: -apple-system, sans-serif; overflow: hidden; }
-    .container { text-align: center; padding: 2rem; }
-    .duck-wrapper { position: relative; display: inline-block; cursor: pointer; transition: transform 0.2s; }
-    .duck-wrapper:hover { transform: scale(1.05); }
-    .duck-wrapper:active { transform: scale(0.95); }
-    .duck { font-size: 150px; user-select: none; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2)); animation: float 3s ease-in-out infinite; }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-    .kwack { position: fixed; font-size: 2rem; font-weight: bold; pointer-events: none; animation: kwackPop 1s ease-out forwards; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
-    @keyframes kwackPop { 0% { opacity: 1; transform: translateY(0) scale(0.5); } 50% { opacity: 1; transform: translateY(-100px) scale(1.2); } 100% { opacity: 0; transform: translateY(-150px) scale(1); } }
-    .title { font-size: 3rem; font-weight: 800; margin-top: 2rem; color: #92400e; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-    .counter { margin-top: 1.5rem; font-size: 1.25rem; color: #78350f; background: rgba(255,255,255,0.5); padding: 0.75rem 2rem; border-radius: 50px; backdrop-filter: blur(10px); }
-    .counter span { font-weight: 700; font-size: 1.5rem; color: #d97706; }
-    .special-counter { animation: pulse 0.5s ease-in-out; }
-    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-    .water { position: fixed; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(to top, #3b82f6, #60a5fa); opacity: 0.3; animation: waves 4s ease-in-out infinite; }
-    @keyframes waves { 0%, 100% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(-10px) scaleY(0.95); } }
-    .ripple { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.4); animation: rippleEffect 0.6s ease-out forwards; pointer-events: none; }
-    @keyframes rippleEffect { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 200px; height: 200px; opacity: 0; } }
-    .stats { position: fixed; bottom: 20px; right: 20px; background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 12px; font-size: 0.85rem; color: #78350f; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-    .mute-btn, .reset-btn { position: fixed; top: 20px; background: rgba(255,255,255,0.9); border: none; padding: 0.75rem; border-radius: 50%; cursor: pointer; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-    .mute-btn { right: 20px; }
-    .reset-btn { right: 90px; }
-    .mute-btn:hover, .reset-btn:hover { transform: scale(1.1); }
+    * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; }
+    
+    body {
+      background: #1a1a2e;
+      overflow: hidden;
+      font-family: -apple-system, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    #game {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 100%);
+    }
+    
+    #duck {
+      position: absolute;
+      font-size: 50px;
+      left: 50px;
+      top: 50%;
+      z-index: 10;
+      transition: transform 0.1s;
+    }
+    
+    .pipe {
+      position: absolute;
+      width: 70px;
+      background: linear-gradient(to right, #2E7D32, #4CAF50, #2E7D32);
+      border-radius: 10px;
+    }
+    
+    .pipe-top {
+      top: 0;
+      border-radius: 0 0 15px 15px;
+    }
+    
+    .pipe-bottom {
+      bottom: 0;
+      border-radius: 15px 15px 0 0;
+    }
+    
+    #score {
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 60px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 3px 3px 0 #000;
+      z-index: 20;
+    }
+    
+    #startScreen, #gameOverScreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+    }
+    
+    #startScreen h1, #gameOverScreen h1 {
+      font-size: 48px;
+      color: #FFD700;
+      text-shadow: 3px 3px 0 #000;
+      margin-bottom: 20px;
+    }
+    
+    #startScreen p, #gameOverScreen p {
+      color: #fff;
+      font-size: 20px;
+      margin-bottom: 30px;
+    }
+    
+    #startBtn, #restartBtn {
+      background: #FFD700;
+      border: none;
+      padding: 20px 50px;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #B8860B;
+    }
+    
+    #startBtn:active, #restartBtn:active {
+      transform: translateY(5px);
+      box-shadow: none;
+    }
+    
+    #finalScore {
+      font-size: 36px;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    
+    .hidden { display: none !important; }
+    
+    #ground {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background: linear-gradient(to bottom, #8B4513, #A0522D);
+      border-top: 5px solid #654321;
+    }
+    
+    #highScore {
+      position: absolute;
+      top: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      color: #FFD700;
+      text-shadow: 2px 2px 0 #000;
+    }
   </style>
 </head>
 <body>
-  <button class="mute-btn" id="muteBtn">🔊</button>
-  <button class="reset-btn" id="resetBtn">🔄</button>
-  <div class="container">
-    <div class="duck-wrapper" id="duckWrapper"><div class="duck">🦆</div></div>
-    <h1 class="title">kwack.in</h1>
-    <div class="counter" id="counterWrapper">Kwacks: <span id="counter">0</span></div>
+  <div id="game">
+    <div id="score">0</div>
+    <div id="highScore">Best: 0</div>
+    <div id="duck">🦆</div>
+    <div id="ground"></div>
+    
+    <div id="startScreen">
+      <h1>🦆 Flappy Duck 🦆</h1>
+      <p>Tap or click to fly!</p>
+      <button id="startBtn">START</button>
+    </div>
+    
+    <div id="gameOverScreen" class="hidden">
+      <h1>Game Over!</h1>
+      <div id="finalScore">Score: 0</div>
+      <button id="restartBtn">PLAY AGAIN</button>
+    </div>
   </div>
-  <div class="water"></div>
-  <div class="stats">🐤 Click the duck!</div>
+  
   <script>
-    localStorage.setItem('kwackKwacks', '0');
-    let count = 0;
-    let isMuted = false;
-    const counterEl = document.getElementById('counter');
-    const counterWrapper = document.getElementById('counterWrapper');
-    const duckWrapper = document.getElementById('duckWrapper');
-    const muteBtn = document.getElementById('muteBtn');
-    const resetBtn = document.getElementById('resetBtn');
+    const game = document.getElementById('game');
+    const duck = document.getElementById('duck');
+    const scoreEl = document.getElementById('score');
+    const highScoreEl = document.getElementById('highScore');
+    const startScreen = document.getElementById('startScreen');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const finalScoreEl = document.getElementById('finalScore');
     
-    function playSound(is69) {
-      if (isMuted || !('speechSynthesis' in window)) return;
-      speechSynthesis.cancel();
-      const utterance = is69 
-        ? Object.assign(new SpeechSynthesisUtterance('ohhh yeahhh'), {pitch: 0.2, rate: 0.8})
-        : Object.assign(new SpeechSynthesisUtterance('kwack'), {pitch: 0.3, rate: 1.2});
-      utterance.volume = 1;
-      speechSynthesis.speak(utterance);
+    let duckY = window.innerHeight / 2;
+    let velocity = 0;
+    let gravity = 0.5;
+    let jumpStrength = -12;
+    let pipes = [];
+    let score = 0;
+    let highScore = localStorage.getItem('flappyDuckHighScore') || 0;
+    let gameRunning = false;
+    let pipeSpeed = 4;
+    let pipeSpawnTimer = 0;
+    let pipeSpawnInterval = 120;
+    let animationId;
+    let gameHeight = window.innerHeight - 80;
+    
+    highScoreEl.textContent = 'Best: ' + highScore;
+    
+    function startGame() {
+      duckY = window.innerHeight / 2;
+      velocity = 0;
+      score = 0;
+      pipeSpeed = 4;
+      pipeSpawnInterval = 120;
+      pipeSpawnTimer = 0;
+      pipes.forEach(p => p.remove());
+      pipes = [];
+      scoreEl.textContent = '0';
+      gameRunning = true;
+      startScreen.classList.add('hidden');
+      gameOverScreen.classList.add('hidden');
+      gameHeight = window.innerHeight - 80;
+      loop();
     }
     
-    function updateCounter() {
-      counterEl.textContent = count;
-      localStorage.setItem('kwackKwacks', count.toString());
+    function jump() {
+      if (!gameRunning) return;
+      velocity = jumpStrength;
     }
     
-    updateCounter();
-    
-    function showEffect(x, y, is69) {
-      const el = document.createElement('div');
-      el.className = 'kwack';
-      el.textContent = is69 ? '🔥 OH YEAH! 🔥' : '🦆 KWACK! 🦆';
-      el.style.color = is69 ? '#ef4444' : '#f59e0b';
-      el.style.fontSize = is69 ? '3rem' : '2rem';
-      el.style.left = x + 'px';
-      el.style.top = y + 'px';
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 1000);
+    function createPipe() {
+      const gap = 160;
+      const minPipeHeight = 100;
+      const maxPipeHeight = gameHeight - gap - minPipeHeight;
+      const topHeight = Math.random() * (maxPipeHeight - minPipeHeight) + minPipeHeight;
+      
+      const pipe = document.createElement('div');
+      pipe.className = 'pipe pipe-top';
+      pipe.style.height = topHeight + 'px';
+      pipe.style.right = '-70px';
+      game.appendChild(pipe);
+      
+      const pipe2 = document.createElement('div');
+      pipe2.className = 'pipe pipe-bottom';
+      pipe2.style.height = (gameHeight - topHeight - gap) + 'px';
+      pipe2.style.right = '-70px';
+      game.appendChild(pipe2);
+      
+      pipes.push({ el: pipe, el2: pipe2, x: window.innerWidth, passed: false });
     }
     
-    function createRipple(x, y) {
-      const ripple = document.createElement('div');
-      ripple.className = 'ripple';
-      ripple.style.left = (x - 100) + 'px';
-      ripple.style.top = (y - 100) + 'px';
-      document.body.appendChild(ripple);
-      setTimeout(() => ripple.remove(), 600);
-    }
-    
-    resetBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      count = 0;
-      updateCounter();
-      counterEl.style.color = '#22c55e';
-      setTimeout(() => counterEl.style.color = '', 500);
-    });
-    
-    duckWrapper.addEventListener('click', (e) => {
-      const is69 = (count === 68);
-      playSound(is69);
-      showEffect(e.clientX, e.clientY - 50, is69);
-      createRipple(e.clientX, e.clientY);
-      count++;
-      updateCounter();
-      if (is69) {
-        counterWrapper.classList.add('special-counter');
-        setTimeout(() => counterWrapper.classList.remove('special-counter'), 500);
+    function gameOver() {
+      gameRunning = false;
+      cancelAnimationFrame(animationId);
+      
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('flappyDuckHighScore', highScore);
+        highScoreEl.textContent = 'Best: ' + highScore;
       }
-      const duck = duckWrapper.querySelector('.duck');
-      duck.style.animation = 'none';
-      duck.offsetHeight;
-      duck.style.animation = 'float 3s ease-in-out infinite';
+      
+      finalScoreEl.textContent = 'Score: ' + score;
+      gameOverScreen.classList.remove('hidden');
+    }
+    
+    function loop() {
+      if (!gameRunning) return;
+      
+      velocity += gravity;
+      duckY += velocity;
+      
+      // Ground collision
+      if (duckY > gameHeight - 40) {
+        duckY = gameHeight - 40;
+        gameOver();
+        return;
+      }
+      
+      // Ceiling collision
+      if (duckY < 0) {
+        duckY = 0;
+        velocity = 0;
+      }
+      
+      duck.style.top = duckY + 'px';
+      duck.style.transform = velocity > 0 ? 'rotate(30deg)' : 'rotate(-30deg)';
+      
+      // Spawn pipes
+      pipeSpawnTimer++;
+      if (pipeSpawnTimer >= pipeSpawnInterval) {
+        createPipe();
+        pipeSpawnTimer = 0;
+        // Gradually increase speed
+        pipeSpeed = Math.min(8, 4 + score * 0.1);
+      }
+      
+      // Move pipes
+      pipes.forEach((pipe, index) => {
+        pipe.x -= pipeSpeed;
+        pipe.el.style.right = (window.innerWidth - pipe.x) + 'px';
+        pipe.el2.style.right = (window.innerWidth - pipe.x) + 'px';
+        
+        const pipeRight = pipe.x + 70;
+        const duckLeft = 50;
+        const duckRight = 100;
+        const duckTop = duckY;
+        const duckBottom = duckY + 40;
+        
+        const topPipeBottom = parseInt(pipe.el.style.height);
+        const bottomPipeTop = gameHeight - parseInt(pipe.el2.style.height);
+        
+        // Check collision
+        if (duckRight > pipe.x && duckLeft < pipeRight) {
+          if (duckTop < topPipeBottom || duckBottom > bottomPipeTop) {
+            gameOver();
+            return;
+          }
+        }
+        
+        // Score
+        if (!pipe.passed && duckLeft > pipeRight) {
+          score++;
+          scoreEl.textContent = score;
+          pipe.passed = true;
+        }
+        
+        // Remove off-screen pipes
+        if (pipe.x < -100) {
+          pipe.el.remove();
+          pipe.el2.remove();
+          pipes.splice(index, 1);
+        }
+      });
+      
+      animationId = requestAnimationFrame(loop);
+    }
+    
+    // Controls
+    document.addEventListener('click', (e) => {
+      if (e.target.id !== 'startBtn' && e.target.id !== 'restartBtn') {
+        jump();
+      }
     });
     
-    muteBtn.addEventListener('click', () => {
-      isMuted = !isMuted;
-      muteBtn.textContent = isMuted ? '🔇' : '🔊';
+    document.addEventListener('touchstart', (e) => {
+      if (e.target.id !== 'startBtn' && e.target.id !== 'restartBtn') {
+        e.preventDefault();
+        jump();
+      }
+    }, { passive: false });
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (!gameRunning && startScreen.classList.contains('hidden') && gameOverScreen.classList.contains('hidden')) {
+          return;
+        }
+        if (gameOverScreen.classList.contains('hidden')) {
+          jump();
+        }
+      }
     });
+    
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', startGame);
   </script>
 </body>
 </html>
