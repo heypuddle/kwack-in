@@ -188,81 +188,78 @@
     <p>🐤 Click the duck to kwack!</p>
   </div>
 
+  <!-- Embedded duck quack sound -->
+  <audio id="quackSound" preload="auto">
+    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+  </audio>
+
   <script>
     let count = parseInt(localStorage.getItem('kwackKwacks') || '0');
     let isMuted = false;
     const counterEl = document.getElementById('counter');
     const duckWrapper = document.getElementById('duckWrapper');
     const muteBtn = document.getElementById('muteBtn');
+    const quackSound = document.getElementById('quackSound');
     
-    let audioCtx = null;
-    
-    async function initAudio() {
-      try {
-        if (!audioCtx) {
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-          await audioCtx.resume();
-        }
-        return true;
-      } catch (e) {
-        console.log('Audio not available:', e);
-        return false;
-      }
-    }
-    
-    function playKwack() {
-      if (isMuted || !audioCtx) return;
+    // Generate a duck-like quack sound using Web Audio API
+    function playQuack() {
+      if (isMuted) return;
       
       try {
-        // Create oscillators for a rich duck sound
-        const t = audioCtx.currentTime;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
         
-        // Main oscillator - downward pitch bend
-        const osc1 = audioCtx.createOscillator();
-        const gain1 = audioCtx.createGain();
+        const ctx = new AudioContext();
+        const t = ctx.currentTime;
+        
+        // Oscillator 1: Main quack tone
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
         osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(1200, t);
-        osc1.frequency.exponentialRampToValueAtTime(400, t + 0.15);
-        gain1.gain.setValueAtTime(0.5, t);
-        gain1.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+        osc1.frequency.setValueAtTime(800, t);
+        osc1.frequency.exponentialRampToValueAtTime(1200, t + 0.05);
+        osc1.frequency.exponentialRampToValueAtTime(600, t + 0.15);
+        gain1.gain.setValueAtTime(0, t);
+        gain1.gain.linearRampToValueAtTime(0.4, t + 0.02);
+        gain1.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
         osc1.connect(gain1);
-        gain1.connect(audioCtx.destination);
+        gain1.connect(ctx.destination);
         osc1.start(t);
-        osc1.stop(t + 0.15);
+        osc1.stop(t + 0.2);
         
-        // Second oscillator - harmony
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
+        // Oscillator 2: Harmonic
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
         osc2.type = 'triangle';
-        osc2.frequency.setValueAtTime(800, t);
-        osc2.frequency.exponentialRampToValueAtTime(300, t + 0.12);
-        gain2.gain.setValueAtTime(0.2, t);
-        gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+        osc2.frequency.setValueAtTime(400, t);
+        osc2.frequency.exponentialRampToValueAtTime(600, t + 0.05);
+        osc2.frequency.exponentialRampToValueAtTime(300, t + 0.15);
+        gain2.gain.setValueAtTime(0, t);
+        gain2.gain.linearRampToValueAtTime(0.15, t + 0.02);
+        gain2.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
         osc2.connect(gain2);
-        gain2.connect(audioCtx.destination);
+        gain2.connect(ctx.destination);
         osc2.start(t);
-        osc2.stop(t + 0.12);
+        osc2.stop(t + 0.15);
         
-        // Noise burst for texture
-        const bufferSize = audioCtx.sampleRate * 0.08;
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        // Noise for texture
+        const bufferSize = ctx.sampleRate * 0.1;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) {
-          data[i] = (Math.random() * 2 - 1) * 0.3;
+          data[i] = (Math.random() * 2 - 1) * 0.2;
         }
-        const noise = audioCtx.createBufferSource();
+        const noise = ctx.createBufferSource();
         noise.buffer = buffer;
-        const noiseGain = audioCtx.createGain();
-        noiseGain.gain.setValueAtTime(0.4, t);
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.15, t);
         noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
         noise.connect(noiseGain);
-        noiseGain.connect(audioCtx.destination);
+        noiseGain.connect(ctx.destination);
         noise.start(t);
         
       } catch (e) {
-        console.log('Error playing sound:', e);
+        console.log('Audio error:', e);
       }
     }
     
@@ -292,18 +289,13 @@
       setTimeout(() => ripple.remove(), 600);
     }
     
-    duckWrapper.addEventListener('click', async (e) => {
-      const audioReady = await initAudio();
-      if (!audioReady) {
-        alert('Audio not supported in this browser');
-        return;
-      }
+    duckWrapper.addEventListener('click', (e) => {
+      playQuack();
       
       count++;
       updateCounter();
       createKwack(e.clientX, e.clientY - 50);
       createRipple(e.clientX, e.clientY);
-      playKwack();
       
       const duck = duckWrapper.querySelector('.duck');
       duck.style.animation = 'none';
