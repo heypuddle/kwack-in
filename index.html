@@ -50,17 +50,17 @@
       50% { transform: translateY(-20px); }
     }
     
-    .quack {
+    .kwack {
       position: fixed;
       font-size: 2rem;
       font-weight: bold;
       color: #f59e0b;
       pointer-events: none;
-      animation: quackPop 1s ease-out forwards;
+      animation: kwackPop 1s ease-out forwards;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     }
     
-    @keyframes quackPop {
+    @keyframes kwackPop {
       0% {
         opacity: 1;
         transform: translateY(0) scale(0.5);
@@ -181,14 +181,14 @@
     updateCounter();
     
     function createQuack(x, y) {
-      const quack = document.createElement('div');
-      quack.className = 'quack';
-      quack.textContent = '🦆 QUACK! 🦆';
-      quack.style.left = x + 'px';
-      quack.style.top = y + 'px';
-      document.body.appendChild(quack);
+      const kwack = document.createElement('div');
+      kwack.className = 'kwack';
+      kwack.textContent = '🦆 KWACK! 🦆';
+      kwack.style.left = x + 'px';
+      kwack.style.top = y + 'px';
+      document.body.appendChild(kwack);
       
-      setTimeout(() => quack.remove(), 1000);
+      setTimeout(() => kwack.remove(), 1000);
     }
     
     function createRipple(x, y) {
