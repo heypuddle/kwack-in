@@ -90,6 +90,15 @@
       color: #d97706;
     }
     
+    .special-counter {
+      animation: pulse 0.5s ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    
     .water {
       position: fixed;
       bottom: 0;
@@ -155,7 +164,7 @@
       <div class="duck">🦆</div>
     </div>
     <h1 class="title">kwack.in</h1>
-    <div class="counter">Kwacks: <span id="counter">0</span></div>
+    <div class="counter" id="counterWrapper">Kwacks: <span id="counter">0</span></div>
   </div>
   
   <div class="water"></div>
@@ -166,25 +175,33 @@
     let count = parseInt(localStorage.getItem('kwackKwacks') || '0');
     let isMuted = false;
     const counterEl = document.getElementById('counter');
+    const counterWrapper = document.getElementById('counterWrapper');
     const duckWrapper = document.getElementById('duckWrapper');
     const muteBtn = document.getElementById('muteBtn');
     
     function playKwackSound() {
       if (isMuted) return;
       
-      // Speech synthesis - more reliable across browsers
       if ('speechSynthesis' in window) {
-        // Cancel any ongoing speech
         speechSynthesis.cancel();
         
-        const utterance = new SpeechSynthesisUtterance('kwack');
-        utterance.pitch = 0.3;  // Lower pitch for duck-like sound
-        utterance.rate = 1.2;
-        utterance.volume = 1;
+        let utterance;
         
-        // Try to find a lower voice
+        if (count === 69) {
+          // Special 69 sound
+          utterance = new SpeechSynthesisUtterance('ohhh yeahhh');
+          utterance.pitch = 0.2;
+          utterance.rate = 0.8;
+          utterance.volume = 1;
+        } else {
+          utterance = new SpeechSynthesisUtterance('kwack');
+          utterance.pitch = 0.3;
+          utterance.rate = 1.2;
+          utterance.volume = 1;
+        }
+        
         const voices = speechSynthesis.getVoices();
-        const lowVoice = voices.find(v => v.name.includes('Male') || v.name.includes('male') || v.name.includes('Deep'));
+        const lowVoice = voices.find(v => v.name.includes('Male') || v.name.includes('male'));
         if (lowVoice) utterance.voice = lowVoice;
         
         speechSynthesis.speak(utterance);
@@ -194,6 +211,11 @@
     function updateCounter() {
       counterEl.textContent = count;
       localStorage.setItem('kwackKwacks', count.toString());
+      
+      if (count === 69) {
+        counterWrapper.classList.add('special-counter');
+        setTimeout(() => counterWrapper.classList.remove('special-counter'), 500);
+      }
     }
     
     updateCounter();
@@ -201,7 +223,15 @@
     function createKwackEffect(x, y) {
       const kwack = document.createElement('div');
       kwack.className = 'kwack';
-      kwack.textContent = '🦆 KWACK! 🦆';
+      
+      if (count === 69) {
+        kwack.textContent = '🔥 OH YEAH! 🔥';
+        kwack.style.color = '#ef4444';
+        kwack.style.fontSize = '3rem';
+      } else {
+        kwack.textContent = '🦆 KWACK! 🦆';
+      }
+      
       kwack.style.left = x + 'px';
       kwack.style.top = y + 'px';
       document.body.appendChild(kwack);
