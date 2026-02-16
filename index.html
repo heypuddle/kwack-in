@@ -153,10 +153,25 @@
     }
     
     .mute-btn:hover { transform: scale(1.1); }
+    
+    .reset-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #78350f;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
   <button class="mute-btn" id="muteBtn">🔊</button>
+  <button class="reset-btn" id="resetBtn">🔄 Reset Counter</button>
   
   <div class="container">
     <div class="duck-wrapper" id="duckWrapper">
@@ -171,15 +186,16 @@
   <div class="stats">🐤 Click the duck!</div>
 
   <script>
-    let count = parseInt(localStorage.getItem('kwackKwacks') || '0');
+    // DEBUG: Start fresh for testing
+    localStorage.setItem('kwackKwacks', '0');
+    let count = 0;
+    
     let isMuted = false;
     const counterEl = document.getElementById('counter');
     const counterWrapper = document.getElementById('counterWrapper');
     const duckWrapper = document.getElementById('duckWrapper');
     const muteBtn = document.getElementById('muteBtn');
-    
-    // Test: verify 69 logic
-    console.log('Initial count:', count);
+    const resetBtn = document.getElementById('resetBtn');
     
     function playSound(is69) {
       if (isMuted) return;
@@ -200,10 +216,6 @@
       }
       
       utterance.volume = 1;
-      const voices = speechSynthesis.getVoices();
-      const lowVoice = voices.find(v => v.name.includes('Male'));
-      if (lowVoice) utterance.voice = lowVoice;
-      
       speechSynthesis.speak(utterance);
     }
     
@@ -243,10 +255,14 @@
       setTimeout(() => ripple.remove(), 600);
     }
     
+    resetBtn.addEventListener('click', () => {
+      count = 0;
+      updateCounter();
+    });
+    
     duckWrapper.addEventListener('click', (e) => {
       // Check BEFORE incrementing
       const is69 = (count === 69);
-      console.log('Click - current:', count, 'is69:', is69);
       
       playSound(is69);
       showEffect(e.clientX, e.clientY - 50, is69);
