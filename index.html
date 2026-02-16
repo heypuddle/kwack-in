@@ -54,7 +54,6 @@
       position: fixed;
       font-size: 2rem;
       font-weight: bold;
-      color: #f59e0b;
       pointer-events: none;
       animation: kwackPop 1s ease-out forwards;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
@@ -188,18 +187,20 @@
         let utterance;
         
         if (count === 69) {
-          // Special 69 sound
           utterance = new SpeechSynthesisUtterance('ohhh yeahhh');
           utterance.pitch = 0.2;
           utterance.rate = 0.8;
-          utterance.volume = 1;
+        } else if (count === 70) {
+          utterance = new SpeechSynthesisUtterance('ready for more');
+          utterance.pitch = 0.3;
+          utterance.rate = 1;
         } else {
           utterance = new SpeechSynthesisUtterance('kwack');
           utterance.pitch = 0.3;
           utterance.rate = 1.2;
-          utterance.volume = 1;
         }
         
+        utterance.volume = 1;
         const voices = speechSynthesis.getVoices();
         const lowVoice = voices.find(v => v.name.includes('Male') || v.name.includes('male'));
         if (lowVoice) utterance.voice = lowVoice;
@@ -212,7 +213,7 @@
       counterEl.textContent = count;
       localStorage.setItem('kwackKwacks', count.toString());
       
-      if (count === 69) {
+      if (count === 69 || count === 70) {
         counterWrapper.classList.add('special-counter');
         setTimeout(() => counterWrapper.classList.remove('special-counter'), 500);
       }
@@ -228,8 +229,14 @@
         kwack.textContent = '🔥 OH YEAH! 🔥';
         kwack.style.color = '#ef4444';
         kwack.style.fontSize = '3rem';
+      } else if (count === 70) {
+        kwack.textContent = '💪 READY FOR MORE 💪';
+        kwack.style.color = '#22c55e';
+        kwack.style.fontSize = '2.5rem';
       } else {
         kwack.textContent = '🦆 KWACK! 🦆';
+        kwack.style.color = '#f59e0b';
+        kwack.style.fontSize = '2rem';
       }
       
       kwack.style.left = x + 'px';
