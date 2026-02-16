@@ -172,32 +172,21 @@
     function playKwackSound() {
       if (isMuted) return;
       
-      // Create a simple oscillator-based duck sound
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const t = audioCtx.currentTime;
+      // Speech synthesis - more reliable across browsers
+      if ('speechSynthesis' in window) {
+        // Cancel any ongoing speech
+        speechSynthesis.cancel();
         
-        // Main tone - starts high, goes low (like a quack)
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(1000, t);
-        osc.frequency.exponentialRampToValueAtTime(300, t + 0.15);
-        
-        gain.gain.setValueAtTime(0.3, t);
-        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
-        
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        
-        osc.start(t);
-        osc.stop(t + 0.15);
-      } catch(e) {
-        // Fallback: use speech
         const utterance = new SpeechSynthesisUtterance('kwack');
-        utterance.pitch = 0.5;
-        utterance.rate = 1.5;
+        utterance.pitch = 0.3;  // Lower pitch for duck-like sound
+        utterance.rate = 1.2;
+        utterance.volume = 1;
+        
+        // Try to find a lower voice
+        const voices = speechSynthesis.getVoices();
+        const lowVoice = voices.find(v => v.name.includes('Male') || v.name.includes('male') || v.name.includes('Deep'));
+        if (lowVoice) utterance.voice = lowVoice;
+        
         speechSynthesis.speak(utterance);
       }
     }
