@@ -1,1 +1,249 @@
-<!DOCTYPE html><html><head><title>Hello World</title></head><body><h1>Hello World</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🦆 kwack.in</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #fef9c3 0%, #fef08a 50%, #fde047 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+    }
+    
+    .container {
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    .duck-wrapper {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    .duck-wrapper:hover {
+      transform: scale(1.05);
+    }
+    
+    .duck-wrapper:active {
+      transform: scale(0.95);
+    }
+    
+    .duck {
+      font-size: 150px;
+      user-select: none;
+      filter: drop-shadow(0 10px 30px rgba(0,0,0,0.2));
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .quack {
+      position: fixed;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #f59e0b;
+      pointer-events: none;
+      animation: quackPop 1s ease-out forwards;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    @keyframes quackPop {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.5);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(-100px) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-150px) scale(1);
+      }
+    }
+    
+    .title {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-top: 2rem;
+      color: #92400e;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .counter {
+      margin-top: 1.5rem;
+      font-size: 1.25rem;
+      color: #78350f;
+      background: rgba(255,255,255,0.5);
+      padding: 0.75rem 2rem;
+      border-radius: 50px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .counter span {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #d97706;
+    }
+    
+    .water {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100px;
+      background: linear-gradient(to top, #3b82f6, #60a5fa);
+      opacity: 0.3;
+      animation: waves 4s ease-in-out infinite;
+    }
+    
+    @keyframes waves {
+      0%, 100% { transform: translateY(0) scaleY(1); }
+      50% { transform: translateY(-10px) scaleY(0.95); }
+    }
+    
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      animation: rippleEffect 0.6s ease-out forwards;
+      pointer-events: none;
+    }
+    
+    @keyframes rippleEffect {
+      0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+      }
+      100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+      }
+    }
+    
+    .stats {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.9);
+      padding: 1rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: #78350f;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .stats p {
+      margin: 0.25rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="duck-wrapper" id="duckWrapper">
+      <div class="duck">🦆</div>
+    </div>
+    <h1 class="title">kwack.in</h1>
+    <div class="counter">Quacks: <span id="counter">0</span></div>
+  </div>
+  
+  <div class="water"></div>
+  
+  <div class="stats">
+    <p>🐤 Click the duck!</p>
+  </div>
+
+  <script>
+    let count = parseInt(localStorage.getItem('kwackQuacks') || '0');
+    const counterEl = document.getElementById('counter');
+    const duckWrapper = document.getElementById('duckWrapper');
+    
+    function updateCounter() {
+      counterEl.textContent = count;
+      localStorage.setItem('kwackQuacks', count.toString());
+    }
+    
+    updateCounter();
+    
+    function createQuack(x, y) {
+      const quack = document.createElement('div');
+      quack.className = 'quack';
+      quack.textContent = '🦆 QUACK! 🦆';
+      quack.style.left = x + 'px';
+      quack.style.top = y + 'px';
+      document.body.appendChild(quack);
+      
+      setTimeout(() => quack.remove(), 1000);
+    }
+    
+    function createRipple(x, y) {
+      const ripple = document.createElement('div');
+      ripple.className = 'ripple';
+      ripple.style.left = (x - 100) + 'px';
+      ripple.style.top = (y - 100) + 'px';
+      document.body.appendChild(ripple);
+      
+      setTimeout(() => ripple.remove(), 600);
+    }
+    
+    duckWrapper.addEventListener('click', (e) => {
+      count++;
+      updateCounter();
+      createQuack(e.clientX, e.clientY - 50);
+      createRipple(e.clientX, e.clientY);
+      
+      // Make the duck bounce
+      const duck = duckWrapper.querySelector('.duck');
+      duck.style.animation = 'none';
+      duck.offsetHeight; // Trigger reflow
+      duck.style.animation = 'float 3s ease-in-out infinite';
+    });
+    
+    // Easter egg: Konami code
+    const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === konami[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === konami.length) {
+          // Duck army!
+          for (let i = 0; i < 10; i++) {
+            setTimeout(() => {
+              const duck = document.createElement('div');
+              duck.textContent = '🦆';
+              duck.style.cssText = `
+                position: fixed;
+                font-size: ${30 + Math.random() * 40}px;
+                left: ${Math.random() * window.innerWidth}px;
+                top: -50px;
+                animation: float 2s ease-in-out forwards;
+              `;
+              document.body.appendChild(duck);
+              setTimeout(() => duck.remove(), 2000);
+            }, i * 200);
+          }
+          konamiIndex = 0;
+        }
+      } else {
+        konamiIndex = 0;
+      }
+    });
+  </script>
+</body>
+</html>
