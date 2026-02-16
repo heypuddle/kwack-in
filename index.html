@@ -178,16 +178,18 @@
     const duckWrapper = document.getElementById('duckWrapper');
     const muteBtn = document.getElementById('muteBtn');
     
-    function playSound() {
+    // Test: verify 69 logic
+    console.log('Initial count:', count);
+    
+    function playSound(is69) {
       if (isMuted) return;
-      
       if (!('speechSynthesis' in window)) return;
       
       speechSynthesis.cancel();
       
       let utterance;
       
-      if (count === 69) {
+      if (is69) {
         utterance = new SpeechSynthesisUtterance('ohhh yeahhh');
         utterance.pitch = 0.2;
         utterance.rate = 0.8;
@@ -208,20 +210,15 @@
     function updateCounter() {
       counterEl.textContent = count;
       localStorage.setItem('kwackKwacks', count.toString());
-      
-      if (count === 69) {
-        counterWrapper.classList.add('special-counter');
-        setTimeout(() => counterWrapper.classList.remove('special-counter'), 500);
-      }
     }
     
     updateCounter();
     
-    function showEffect(x, y) {
+    function showEffect(x, y, is69) {
       const el = document.createElement('div');
       el.className = 'kwack';
       
-      if (count === 69) {
+      if (is69) {
         el.textContent = '🔥 OH YEAH! 🔥';
         el.style.color = '#ef4444';
         el.style.fontSize = '3rem';
@@ -247,12 +244,21 @@
     }
     
     duckWrapper.addEventListener('click', (e) => {
-      playSound();
-      showEffect(e.clientX, e.clientY - 50);
+      // Check BEFORE incrementing
+      const is69 = (count === 69);
+      console.log('Click - current:', count, 'is69:', is69);
+      
+      playSound(is69);
+      showEffect(e.clientX, e.clientY - 50, is69);
       createRipple(e.clientX, e.clientY);
       
       count++;
       updateCounter();
+      
+      if (is69) {
+        counterWrapper.classList.add('special-counter');
+        setTimeout(() => counterWrapper.classList.remove('special-counter'), 500);
+      }
       
       const duck = duckWrapper.querySelector('.duck');
       duck.style.animation = 'none';
