@@ -151,15 +151,35 @@
     .stats p {
       margin: 0.25rem 0;
     }
+    
+    .mute-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      padding: 0.75rem;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    
+    .mute-btn:hover {
+      transform: scale(1.1);
+    }
   </style>
 </head>
 <body>
+  <button class="mute-btn" id="muteBtn" title="Toggle sound">🔊</button>
+  
   <div class="container">
     <div class="duck-wrapper" id="duckWrapper">
       <div class="duck">🦆</div>
     </div>
     <h1 class="title">kwack.in</h1>
-    <div class="counter">Quacks: <span id="counter">0</span></div>
+    <div class="counter">Kwacks: <span id="counter">0</span></div>
   </div>
   
   <div class="water"></div>
@@ -169,18 +189,86 @@
   </div>
 
   <script>
-    let count = parseInt(localStorage.getItem('kwackQuacks') || '0');
+    let count = parseInt(localStorage.getItem('kwackKwacks') || '0');
+    let isMuted = false;
     const counterEl = document.getElementById('counter');
     const duckWrapper = document.getElementById('duckWrapper');
+    const muteBtn = document.getElementById('muteBtn');
+    
+    // Web Audio API context
+    let audioCtx = null;
+    
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+    
+    function playKwack() {
+      if (isMuted || !audioCtx) return;
+      
+      try {
+        // Create oscillator for the quack-like sound
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        
+        // Setup filter for duck-like tone
+        filter.type = 'bandpass';
+        filter.frequency.value = 1500;
+        filter.Q.value = 1;
+        
+        // Create noise for the "quack" texture
+        const noise = audioCtx.createBufferSource();
+        const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.1, audioCtx.sampleRate);
+        const noiseData = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < noiseData.length; i++) {
+          noiseData[i] = Math.random() * 2 - 1;
+        }
+        noise.buffer = noiseBuffer;
+        
+        const noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        noiseGain.gain.exponentialDecayTo = 0.01;
+        noiseGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        
+        // Main tone
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.2);
+        
+        gainNode.gain.setValueAtTime(0.4, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        
+        // Connect nodes
+        osc.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        noise.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+        
+        // Play
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.2);
+        noise.start(audioCtx.currentTime);
+        noise.stop(audioCtx.currentTime + 0.1);
+        
+      } catch (e) {
+        console.log('Audio not available');
+      }
+    }
     
     function updateCounter() {
       counterEl.textContent = count;
-      localStorage.setItem('kwackQuacks', count.toString());
+      localStorage.setItem('kwackKwacks', count.toString());
     }
     
     updateCounter();
     
-    function createQuack(x, y) {
+    function createKwack(x, y) {
       const kwack = document.createElement('div');
       kwack.className = 'kwack';
       kwack.textContent = '🦆 KWACK! 🦆';
@@ -202,16 +290,23 @@
     }
     
     duckWrapper.addEventListener('click', (e) => {
+      initAudio();
       count++;
       updateCounter();
-      createQuack(e.clientX, e.clientY - 50);
+      createKwack(e.clientX, e.clientY - 50);
       createRipple(e.clientX, e.clientY);
+      playKwack();
       
       // Make the duck bounce
       const duck = duckWrapper.querySelector('.duck');
       duck.style.animation = 'none';
-      duck.offsetHeight; // Trigger reflow
+      duck.offsetHeight;
       duck.style.animation = 'float 3s ease-in-out infinite';
+    });
+    
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      muteBtn.textContent = isMuted ? '🔇' : '🔊';
     });
     
     // Easter egg: Konami code
