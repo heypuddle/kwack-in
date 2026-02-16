@@ -178,42 +178,38 @@
     const duckWrapper = document.getElementById('duckWrapper');
     const muteBtn = document.getElementById('muteBtn');
     
-    function playKwackSound() {
+    function playSound() {
       if (isMuted) return;
       
-      if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        
-        let utterance;
-        
-        if (count === 69) {
-          utterance = new SpeechSynthesisUtterance('ohhh yeahhh');
-          utterance.pitch = 0.2;
-          utterance.rate = 0.8;
-        } else if (count === 70) {
-          utterance = new SpeechSynthesisUtterance('ready for more');
-          utterance.pitch = 0.3;
-          utterance.rate = 1;
-        } else {
-          utterance = new SpeechSynthesisUtterance('kwack');
-          utterance.pitch = 0.3;
-          utterance.rate = 1.2;
-        }
-        
-        utterance.volume = 1;
-        const voices = speechSynthesis.getVoices();
-        const lowVoice = voices.find(v => v.name.includes('Male') || v.name.includes('male'));
-        if (lowVoice) utterance.voice = lowVoice;
-        
-        speechSynthesis.speak(utterance);
+      if (!('speechSynthesis' in window)) return;
+      
+      speechSynthesis.cancel();
+      
+      let utterance;
+      
+      if (count === 69) {
+        utterance = new SpeechSynthesisUtterance('ohhh yeahhh');
+        utterance.pitch = 0.2;
+        utterance.rate = 0.8;
+      } else {
+        utterance = new SpeechSynthesisUtterance('kwack');
+        utterance.pitch = 0.3;
+        utterance.rate = 1.2;
       }
+      
+      utterance.volume = 1;
+      const voices = speechSynthesis.getVoices();
+      const lowVoice = voices.find(v => v.name.includes('Male'));
+      if (lowVoice) utterance.voice = lowVoice;
+      
+      speechSynthesis.speak(utterance);
     }
     
     function updateCounter() {
       counterEl.textContent = count;
       localStorage.setItem('kwackKwacks', count.toString());
       
-      if (count === 69 || count === 70) {
+      if (count === 69) {
         counterWrapper.classList.add('special-counter');
         setTimeout(() => counterWrapper.classList.remove('special-counter'), 500);
       }
@@ -221,28 +217,24 @@
     
     updateCounter();
     
-    function createKwackEffect(x, y) {
-      const kwack = document.createElement('div');
-      kwack.className = 'kwack';
+    function showEffect(x, y) {
+      const el = document.createElement('div');
+      el.className = 'kwack';
       
       if (count === 69) {
-        kwack.textContent = '🔥 OH YEAH! 🔥';
-        kwack.style.color = '#ef4444';
-        kwack.style.fontSize = '3rem';
-      } else if (count === 70) {
-        kwack.textContent = '💪 READY FOR MORE 💪';
-        kwack.style.color = '#22c55e';
-        kwack.style.fontSize = '2.5rem';
+        el.textContent = '🔥 OH YEAH! 🔥';
+        el.style.color = '#ef4444';
+        el.style.fontSize = '3rem';
       } else {
-        kwack.textContent = '🦆 KWACK! 🦆';
-        kwack.style.color = '#f59e0b';
-        kwack.style.fontSize = '2rem';
+        el.textContent = '🦆 KWACK! 🦆';
+        el.style.color = '#f59e0b';
+        el.style.fontSize = '2rem';
       }
       
-      kwack.style.left = x + 'px';
-      kwack.style.top = y + 'px';
-      document.body.appendChild(kwack);
-      setTimeout(() => kwack.remove(), 1000);
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1000);
     }
     
     function createRipple(x, y) {
@@ -255,11 +247,12 @@
     }
     
     duckWrapper.addEventListener('click', (e) => {
-      playKwackSound();
+      playSound();
+      showEffect(e.clientX, e.clientY - 50);
+      createRipple(e.clientX, e.clientY);
+      
       count++;
       updateCounter();
-      createKwackEffect(e.clientX, e.clientY - 50);
-      createRipple(e.clientX, e.clientY);
       
       const duck = duckWrapper.querySelector('.duck');
       duck.style.animation = 'none';
