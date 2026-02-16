@@ -171,7 +171,7 @@
 </head>
 <body>
   <button class="mute-btn" id="muteBtn">🔊</button>
-  <button class="reset-btn" id="resetBtn">🔄 Reset Counter</button>
+  <button class="reset-btn" id="resetBtn">🔄 Reset</button>
   
   <div class="container">
     <div class="duck-wrapper" id="duckWrapper">
@@ -186,7 +186,7 @@
   <div class="stats">🐤 Click the duck!</div>
 
   <script>
-    // DEBUG: Start fresh for testing
+    // Reset for testing
     localStorage.setItem('kwackKwacks', '0');
     let count = 0;
     
@@ -261,8 +261,8 @@
     });
     
     duckWrapper.addEventListener('click', (e) => {
-      // Check BEFORE incrementing
-      const is69 = (count === 69);
+      // TRIGGER AT 69: when clicking to go from 68→69
+      const is69 = (count === 68);
       
       playSound(is69);
       showEffect(e.clientX, e.clientY - 50, is69);
